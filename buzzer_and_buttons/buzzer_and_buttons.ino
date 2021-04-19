@@ -1,33 +1,65 @@
 #include <Adafruit_Arcada.h>
 
 #define buzzerPin 16
-#define touchSensorPin 15
+#define heartbeatSensorPin 1
 
 bool disableBuzzer;
 int touchSensor;
+
+// constants for calculating finger pulse
+double alpha = 0.75;
+double change = 0.0;
 
 Adafruit_Arcada emergencySystem;  //initialize object
 
 void setup() {
   Serial.begin(115200);
   emergencySystem.arcadaBegin();
+  emergencySystem.displayBegin();
+  
 
   //set buzzerPin
   pinMode(buzzerPin, OUTPUT);
   digitalWrite(buzzerPin, LOW);
 
-  //set touchsensor pin
-  pinMode(touchSensorPin, INPUT);
+
+  // arcada display
+  
+  for (int i=0; i<250; i+=10) {
+    emergencySystem.setBacklight(i);
+    delay(1);
+  }
+  emergencySystem.display->setCursor(0, 0);
+  emergencySystem.display->setTextWrap(true);
+  emergencySystem.display->setTextSize(8);
+  emergencySystem.display->setTextColor(ARCADA_RED, ARCADA_WHITE);
+
 }
 
 void loop() {
 
+  //finger pulse sensor
+  static double oldValue = 0;
+  static double oldChange = 0;
+  int rawValue = analogRead (heartbeatSensorPin);
+  double pulseValue = alpha * oldValue + (1 - alpha) * rawValue;
+  Serial.print (rawValue);
+  Serial.print (",");
+  Serial.println (pulseValue);
+  oldValue = pulseValue;
+  emergencySystem.display->setCursor(0,0);
+  emergencySystem.display->print("ExistenceAlarm");
+  emergencySystem.display->setTextSize(4);
+  emergencySystem.display->print(pulseValue);
+
+
   //read button values
   emergencySystem.readButtons();
   uint8_t buttonVals = emergencySystem.justPressedButtons();
-  touchSensor = digitalRead(touchSensorPin);
+  
   //if A is pressed
-  if (buttonVals == 65 || touchSensor == LOW){
+  if (buttonVals == 65 || pulseValue > 850){
+    flashEmergencyScreen();
     bool disableBuzzer = 0;
 
     //while B button is not pressed
@@ -58,5 +90,9 @@ void loop() {
       }
     }
   }
+  
+}
+
+void flashEmergencyScreen(){
   
 }
