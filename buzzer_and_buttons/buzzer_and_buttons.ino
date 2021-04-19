@@ -1,9 +1,10 @@
 #include <Adafruit_Arcada.h>
 
 #define buzzerPin 16
-#define buttonPin 15
+#define touchSensorPin 15
 
 bool disableBuzzer;
+int touchSensor;
 
 Adafruit_Arcada emergencySystem;  //initialize object
 
@@ -14,6 +15,9 @@ void setup() {
   //set buzzerPin
   pinMode(buzzerPin, OUTPUT);
   digitalWrite(buzzerPin, LOW);
+
+  //set touchsensor pin
+  pinMode(touchSensorPin, INPUT);
 }
 
 void loop() {
@@ -21,9 +25,9 @@ void loop() {
   //read button values
   emergencySystem.readButtons();
   uint8_t buttonVals = emergencySystem.justPressedButtons();
-
+  touchSensor = digitalRead(touchSensorPin);
   //if A is pressed
-  if (buttonVals == 65){
+  if (buttonVals == 65 || touchSensor == LOW){
     bool disableBuzzer = 0;
 
     //while B button is not pressed
