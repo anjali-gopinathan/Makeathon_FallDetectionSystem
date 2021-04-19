@@ -1,4 +1,5 @@
 #include <Adafruit_Arcada.h>
+#include <Adafruit_LSM6DS33.h>
 
 #define buzzerPin 16
 #define heartbeatSensorPin 1
@@ -11,6 +12,7 @@ double alpha = 0.75;
 double change = 0.0;
 
 Adafruit_Arcada emergencySystem;  //initialize object
+Adafruit_LSM6DS33 lsm6ds33;
 
 void setup() {
   Serial.begin(115200);
@@ -52,13 +54,29 @@ void loop() {
   emergencySystem.display->setTextSize(4);
   emergencySystem.display->print(pulseValue);
 
+  //read gyro values
+  sensors_event_t gyro;
+  lsm6ds33.getEvent(NULL, &gyro, NULL);
+  float x = gyro.gyro.x * SENSORS_RADS_TO_DPS;
+  float y = gyro.gyro.y * SENSORS_RADS_TO_DPS;
+  float z = gyro.gyro.z * SENSORS_RADS_TO_DPS;
+
+  sensors_event_t accel;
+  lsm6ds33.getEvent(&accel, NULL, NULL);
+  float ax = accel.acceleration.x;
+  float ay = accel.acceleration.y;
+  float az = accel.acceleration.z;
+
+  Serial.printf("Gyro: %f %f %f\n", x, y, z);
+  Serial.printf("Accel: %f %f %f\n", ax, ay, az);
+
 
   //read button values
   emergencySystem.readButtons();
   uint8_t buttonVals = emergencySystem.justPressedButtons();
   
   //if A is pressed
-  if (buttonVals == 65 || pulseValue > 850){
+  if (buttonVals == 65 || pulseValue > 1000 || az > -74){
     flashEmergencyScreen();
     bool disableBuzzer = 0;
 
