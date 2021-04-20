@@ -44,7 +44,7 @@ void loop() {
   static double oldValue = 0;
   static double oldChange = 0;
   int rawValue = analogRead (heartbeatSensorPin);
-  double pulseValue = alpha * oldValue + (1 - alpha) * rawValue;
+  double pulseValue = (alpha * oldValue + (1 - alpha) * rawValue)/3;
   Serial.print (rawValue);
   Serial.print (",");
   Serial.println (pulseValue);
@@ -76,7 +76,7 @@ void loop() {
   uint8_t buttonVals = emergencySystem.justPressedButtons();
   
   //if A is pressed
-  if (buttonVals == 65 || pulseValue > 1000 || x > 0.6){
+  if (buttonVals == 65 || pulseValue > 100 || x > 0.6){
     flashEmergencyScreen();
     bool disableBuzzer = 0;
 
