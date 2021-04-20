@@ -55,13 +55,13 @@ void loop() {
   emergencySystem.display->print(pulseValue);
 
   //read gyro values
-  sensors_event_t gyro;
+  sensors_event_t accel, gyro;
   lsm6ds33.getEvent(NULL, &gyro, NULL);
-  float x = gyro.gyro.x * SENSORS_RADS_TO_DPS;
-  float y = gyro.gyro.y * SENSORS_RADS_TO_DPS;
-  float z = gyro.gyro.z * SENSORS_RADS_TO_DPS;
+  float x = gyro.gyro.x;
+  float y = gyro.gyro.y;
+  float z = gyro.gyro.z;
 
-  sensors_event_t accel;
+//  sensors_event_t accel;
   lsm6ds33.getEvent(&accel, NULL, NULL);
   float ax = accel.acceleration.x;
   float ay = accel.acceleration.y;
@@ -76,7 +76,7 @@ void loop() {
   uint8_t buttonVals = emergencySystem.justPressedButtons();
   
   //if A is pressed
-  if (buttonVals == 65 || pulseValue > 1000 || az > -74){
+  if (buttonVals == 65 || pulseValue > 1000 || x > 0.6){
     flashEmergencyScreen();
     bool disableBuzzer = 0;
 
